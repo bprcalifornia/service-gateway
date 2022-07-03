@@ -53,6 +53,9 @@ class GitHubEventMiddleware
                 ])->setStatusCode(Response::HTTP_BAD_REQUEST);
             }
 
+            // take off the sha256= prefix on the request header value
+            $requestSignature = str_replace('sha256=', '', $requestSignature);
+
             // take the request body, hash it with SHA-256, and then run it through HMAC
             // using the configured secret as the key
             $signedRequestBody = hash_hmac('sha256', $request->getContent(), $secret);
@@ -62,6 +65,8 @@ class GitHubEventMiddleware
                     'message' => 'Request signature could not be validated using the provided X-Hub-Signature-256 header',
                     'event' => $eventName,
                     'deliveryId' => $eventId,
+                    'receivedSig' => $requestSignature,
+                    'generatedSig' => $signedRequestBody,
                 ])->setStatusCode(Response::HTTP_UNAUTHORIZED);
             }
         }
