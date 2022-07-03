@@ -79,7 +79,7 @@ $app->configure('app');
 
 $app->routeMiddleware([
     //'auth' => App\Http\Middleware\Authenticate::class,
-    'github' => App\Http\Middleware\GitHubMiddleware::class,
+    'github-event' => App\Http\Middleware\GitHubEventMiddleware::class,
 ]);
 
 /*

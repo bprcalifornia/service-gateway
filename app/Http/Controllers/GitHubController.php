@@ -23,6 +23,8 @@ class GitHubController extends Controller
      * Receives a raw event from GitHub.
      * 
      * @param Request $request The request instance we will be processing
+     * 
+     * @link https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads
      */
     public function receiveRawEvent(Request $request) {
         $eventId = $request->header('X-GitHub-Delivery'); // GitHub delivery GUID

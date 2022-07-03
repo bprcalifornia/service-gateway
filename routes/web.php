@@ -20,7 +20,7 @@ $router->get('/', function () use ($router) {
 // GitHub-specific service routes with the /github prefix
 $router->group(['prefix' => 'github'], function() use ($router) {
     // make sure we enforce request validation using webhook secrets
-    $router->group(['middleware' => 'github'], function() use ($router) {
+    $router->group(['middleware' => 'github-event'], function() use ($router) {
         $router->post('raw-event', 'GitHubController@receiveRawEvent');
     });
 });
