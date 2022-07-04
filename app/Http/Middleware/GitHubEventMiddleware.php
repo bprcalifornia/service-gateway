@@ -19,7 +19,16 @@ class GitHubEventMiddleware
      */
     public function handle($request, Closure $next)
     {
-        // make sure the delivery ID and event name are present first
+        // ensure we can receive raw events (default behavior is to allow events)
+        $canReceiveEvents = env('GITHUB_RAW_EVENT_WEBHOOK_SECRET', true);
+        if (!$canReceiveEvents) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'GitHub raw event service is temporarily unavailable so the request has been ignored',
+            ])->setStatusCode(Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
+        // make sure the delivery ID and event name are present
         $eventId = $request->header('X-GitHub-Delivery');
         $eventName = $request->header('X-GitHub-Event');
 
