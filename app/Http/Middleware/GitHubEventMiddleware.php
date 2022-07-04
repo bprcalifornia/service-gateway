@@ -39,6 +39,28 @@ class GitHubEventMiddleware
             ])->setStatusCode(Response::HTTP_BAD_REQUEST);
         }
 
+        // next, make sure the request has been sent as JSON
+        if (!$request->isJson()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Request must be sent with a JSON payload and a Content-Type header of application/json',
+                'event' => $eventName,
+                'deliveryId' => $eventId,
+            ])->setStatusCode(Response::HTTP_BAD_REQUEST);
+        }
+
+        // next, make sure we actually have a request payload so we didn't receive
+        // an empty request
+        $requestBody = $request->getContent();
+        if (empty($requestBody)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Request cannot have an empty body and no event payload was received',
+                'event' => $eventName,
+                'deliveryId' => $eventId,
+            ])->setStatusCode(Response::HTTP_BAD_REQUEST);
+        }
+
         // now validate the payload signature if we have are expecting to receive
         // signatures that leverage our secret
         $secret = env('GITHUB_RAW_EVENT_WEBHOOK_SECRET');
@@ -58,7 +80,7 @@ class GitHubEventMiddleware
 
             // take the request body, hash it with SHA-256, and then run it through HMAC
             // using the configured secret as the key
-            $signedRequestBody = hash_hmac('sha256', $request->getContent(), $secret);
+            $signedRequestBody = hash_hmac('sha256', $requestBody, $secret);
             if (!hash_equals($signedRequestBody, $requestSignature)) {
                 return response()->json([
                     'status' => 'error',
